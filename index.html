@@ -3566,38 +3566,70 @@ window.toggleNotif = function() {
 async function tryRegisterPush() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
   if (Notification.permission === 'denied') return;
+
   if (Notification.permission === 'granted') {
     await registerPushSubscription();
+    return;
+  }
+
+  // Auto-ask on first login (after small delay so UI is ready)
+  if (Notification.permission === 'default') {
+    const alreadyAsked = localStorage.getItem('xzone_push_asked');
+    if (!alreadyAsked) {
+      setTimeout(async () => {
+        const permission = await Notification.requestPermission();
+        localStorage.setItem('xzone_push_asked', '1');
+        if (permission === 'granted') {
+          await registerPushSubscription();
+          showToast('🔔 Notifications activées!', 'success');
+        }
+      }, 2500);
+    }
   }
 }
 
 window.requestPushPermission = async function() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    showToast('Notifications non supportées sur ce navigateur', 'error');
+    return;
+  }
   const permission = await Notification.requestPermission();
+  localStorage.setItem('xzone_push_asked', '1');
   if (permission === 'granted') {
     await registerPushSubscription();
-    showToast('Notifications activées!', 'success');
+    showToast('🔔 Notifications activées!', 'success');
     closeModal('notifSettingsModal');
-  } else {
-    showToast('Permission refusée', 'error');
+  } else if (permission === 'denied') {
+    showToast('Permission refusée — activez-les dans les paramètres du navigateur', 'error');
   }
 };
 
 async function registerPushSubscription() {
   try {
     const reg = await navigator.serviceWorker.ready;
+
+    // Unsubscribe old sub first to avoid stale subs
+    const existing = await reg.pushManager.getSubscription();
+    if (existing) await existing.unsubscribe();
+
     const sub = await reg.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC)
     });
-    
-    // Save subscription to Firestore
+
+    // Save full subscription object to Firestore
     await setDoc(doc(db, 'push_subscriptions', currentUser.id), {
       subscription: JSON.stringify(sub),
-      userId: currentUser.id,
-      pseudo: currentUser.pseudo,
-      updatedAt: serverTimestamp()
+      endpoint:     sub.endpoint,
+      userId:       currentUser.id,
+      pseudo:       currentUser.pseudo,
+      updatedAt:    serverTimestamp()
     });
-  } catch(e) { console.error('Push registration failed:', e); }
+
+    console.log('✅ Push subscription saved');
+  } catch(e) {
+    console.error('Push registration failed:', e);
+  }
 }
 
 window.disablePush = async function() {
@@ -3658,7 +3690,33 @@ window.installPWA = function() {
 
 // ===== SERVICE WORKER =====
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(e => console.log('SW not found:', e));
+  navigator.serviceWorker.register('sw.js')
+    .then(reg => {
+      console.log('✅ SW registered', reg.scope);
+    })
+    .catch(e => console.log('SW not found:', e));
+
+  // Handle navigation messages from SW (when user clicks notification)
+  navigator.serviceWorker.addEventListener('message', e => {
+    if (e.data?.type === 'NAVIGATE') {
+      const url = new URL(e.data.url, location.origin);
+      const section = url.searchParams.get('section');
+      const tab = url.searchParams.get('tab');
+
+      if (section && document.getElementById('section-' + section)) {
+        // Find the nav button for this section and trigger it
+        const navBtns = document.querySelectorAll('.nav-item');
+        const btn = Array.from(navBtns).find(b => {
+          const labels = { flux:'Flux', factions:'Factions', market:'Market', msgs:'Messages', profil:'Profil' };
+          return b.textContent.trim().includes(labels[section] || '');
+        });
+        if (btn) switchSection(section, btn);
+        if (section === 'msgs' && tab) {
+          setTimeout(() => switchMsgsTab(tab), 300);
+        }
+      }
+    }
+  });
 }
 
 // ===== KEYBOARD EVENTS =====
