@@ -2890,9 +2890,7 @@ async function loginUser(userData) {
   await tryRegisterPush();
   // Watch unread messages
   watchUnreadCount();
-  // Hide msgs FAB initially
-  const fab = document.getElementById('newConvFab');
-  if (fab) fab.style.display = 'none';
+  // (no FAB needed)
 }
 
 window.logout = function() {
@@ -3515,12 +3513,7 @@ window.switchSection = function(section, el) {
   const labels = { flux: 'Le Flux', factions: 'Factions', market: 'Black Market', msgs: 'Messages', profil: 'Profil' };
   document.getElementById('topbarSection').textContent = labels[section] || '';
 
-  // Hide FAB when not in msgs
-  const fab = document.getElementById('newConvFab');
-  if (fab) fab.style.display = section === 'msgs' ? 'flex' : 'none';
-
   if (section === 'msgs') {
-    // Default to inbox tab
     switchMsgsTab('inbox');
   }
 };
@@ -4242,13 +4235,12 @@ window.switchMsgsTab = function(tab) {
   
   if (tab === 'inbox') {
     inbox.style.display = 'flex';
-    room.style.display = 'none';
-    document.getElementById('newConvFab').style.display = 'flex';
+    room.style.display  = 'none';
     loadConversations();
   } else {
     inbox.style.display = 'none';
     room.style.display = 'flex';
-    document.getElementById('newConvFab').style.display = 'none';
+    // FAB removed
     loadRoomMessages();
   }
 };
