@@ -1,0 +1,2461 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>X-ZONE</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --gold: #c9a84c;
+  --gold-light: #f0d080;
+  --gold-dark: #8a6820;
+  --bg: #080808;
+  --bg2: #0f0f0f;
+  --bg3: #161616;
+  --bg4: #1e1e1e;
+  --border: rgba(201,168,76,0.15);
+  --border-bright: rgba(201,168,76,0.4);
+  --text: #e8e8e8;
+  --text-muted: #888;
+  --danger: #c0392b;
+  --success: #27ae60;
+  --font-ui: 'Syne', sans-serif;
+  --font-display: 'Playfair Display', serif;
+  --font-mono: 'DM Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 2px; }
+
+/* BACKGROUND GRAIN */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+}
+
+/* PAGES */
+.page { display: none; min-height: 100vh; position: relative; z-index: 1; }
+.page.active { display: flex; flex-direction: column; }
+
+/* ===== AUTH PAGE ===== */
+#auth-page {
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 60%);
+}
+
+.auth-logo {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.auth-logo .logo-text {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 12vw, 5rem);
+  color: var(--gold);
+  letter-spacing: -2px;
+  line-height: 1;
+  text-shadow: 0 0 60px rgba(201,168,76,0.3);
+}
+
+.auth-logo .tagline {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+.auth-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: clamp(24px, 6vw, 40px);
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.05);
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg3);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 28px;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 7px;
+  transition: all 0.2s;
+}
+
+.auth-tab.active {
+  background: var(--gold);
+  color: var(--bg);
+}
+
+.form-group { margin-bottom: 16px; }
+
+.form-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.form-input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus { border-color: var(--gold); }
+.form-input::placeholder { color: var(--text-muted); }
+
+.btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold), var(--gold-light));
+  color: var(--bg);
+}
+
+.btn-gold:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(201,168,76,0.3); }
+.btn-gold:active { transform: translateY(0); }
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border-bright);
+  color: var(--gold);
+  margin-top: 10px;
+}
+
+.btn-outline:hover { background: rgba(201,168,76,0.08); }
+
+.btn-ghost {
+  background: var(--bg3);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.fingerprint-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px;
+  background: var(--bg3);
+  border: 1px dashed var(--border-bright);
+  border-radius: 10px;
+  color: var(--gold);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 16px;
+}
+
+.fingerprint-btn:hover { background: rgba(201,168,76,0.05); }
+
+.fingerprint-icon {
+  font-size: 22px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.auth-form { display: none; }
+.auth-form.active { display: block; }
+
+/* ===== APP SHELL ===== */
+#app-page {
+  flex-direction: column;
+  max-width: 100vw;
+}
+
+/* TOP BAR */
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 56px;
+  background: rgba(8,8,8,0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  z-index: 100;
+}
+
+.topbar-logo {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--gold);
+  font-style: italic;
+  flex-shrink: 0;
+}
+
+.topbar-section {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.icon-btn {
+  width: 36px; height: 36px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.icon-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+.notif-dot {
+  position: relative;
+}
+.notif-dot::after {
+  content: '';
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 7px; height: 7px;
+  background: var(--gold);
+  border-radius: 50%;
+  border: 1px solid var(--bg);
+}
+
+/* BOTTOM NAV */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 60px;
+  background: rgba(8,8,8,0.98);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: stretch;
+  z-index: 100;
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 8px 0;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  position: relative;
+}
+
+.nav-item.active {
+  color: var(--gold);
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 30%; right: 30%;
+  height: 2px;
+  background: var(--gold);
+  border-radius: 0 0 4px 4px;
+}
+
+.nav-icon { font-size: 20px; }
+.nav-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; }
+
+/* CONTENT */
+.content {
+  margin-top: 56px;
+  margin-bottom: 60px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* SECTION */
+.section { display: none; }
+.section.active { display: block; }
+
+/* ===== FLUX (GLOBAL STREAM) ===== */
+.flux-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 5vw, 22px);
+  color: var(--gold);
+  font-style: italic;
+}
+
+.compose-area {
+  padding: 16px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+
+.compose-inner {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.compose-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  resize: none;
+  outline: none;
+  min-height: 60px;
+  line-height: 1.5;
+}
+
+.compose-textarea::placeholder { color: var(--text-muted); }
+
+.compose-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  flex-wrap: wrap;
+}
+
+.compose-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  flex: 1;
+  min-width: 120px;
+}
+
+.compose-meta span { color: var(--gold); }
+
+.mini-btn {
+  padding: 8px 12px;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.mini-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+.send-btn {
+  padding: 8px 16px;
+  background: var(--gold);
+  border: none;
+  border-radius: 8px;
+  color: var(--bg);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+
+.send-btn:hover { background: var(--gold-light); }
+
+.posts-feed { padding: 8px; }
+
+/* POST CARD */
+.post-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 8px;
+  transition: border-color 0.2s;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.post-card:hover { border-color: var(--border-bright); }
+
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.post-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-dark), var(--bg3));
+  border: 1px solid var(--border-bright);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gold);
+  flex-shrink: 0;
+  font-weight: 500;
+}
+
+.post-meta { flex: 1; min-width: 0; }
+
+.post-pseudo {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.post-time {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.post-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+  word-break: break-word;
+  margin-bottom: 10px;
+}
+
+.post-image {
+  width: 100%;
+  border-radius: 8px;
+  max-height: 300px;
+  object-fit: cover;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.vote-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  font-family: var(--font-mono);
+  transition: color 0.2s;
+  padding: 4px 0;
+}
+
+.vote-btn:hover { color: var(--gold); }
+.vote-btn.active-up { color: #4ade80; }
+.vote-btn.active-down { color: #f87171; }
+
+.post-score {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--gold);
+  margin: 0 4px;
+}
+
+/* ===== FACTIONS ===== */
+.factions-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.search-bar {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.search-input {
+  flex: 1;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus { border-color: var(--gold); }
+.search-input::placeholder { color: var(--text-muted); }
+
+.factions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
+  gap: 10px;
+  padding: 16px;
+}
+
+.faction-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.faction-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.faction-card:hover { border-color: var(--border-bright); transform: translateY(-2px); }
+.faction-card:hover::before { opacity: 1; }
+
+.faction-emoji { font-size: 28px; margin-bottom: 8px; }
+
+.faction-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.faction-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--gold);
+}
+
+.faction-members {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+/* CREATE FACTION BTN */
+.create-faction-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  background: transparent;
+  border: 1px dashed var(--border-bright);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--gold);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.create-faction-btn:hover { background: rgba(201,168,76,0.05); }
+
+/* ===== MARKET ===== */
+.market-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.market-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
+  gap: 10px;
+  padding: 16px;
+}
+
+.listing-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.listing-card:hover { border-color: var(--border-bright); transform: translateY(-2px); }
+
+.listing-img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  background: var(--bg3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+  color: var(--border);
+}
+
+.listing-img img { width: 100%; height: 100%; object-fit: cover; }
+
+.listing-body { padding: 10px; }
+
+.listing-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.listing-price {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--gold);
+  display: flex; align-items: center; gap: 4px;
+}
+
+.listing-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  background: rgba(201,168,76,0.15);
+  border: 1px solid var(--border-bright);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--gold);
+  margin-top: 5px;
+}
+
+/* ===== PROFIL ===== */
+.profile-section {
+  padding: 24px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-avatar {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-dark) 0%, var(--bg3) 100%);
+  border: 2px solid var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--gold);
+  margin-bottom: 12px;
+  box-shadow: 0 0 30px rgba(201,168,76,0.2);
+}
+
+.profile-name {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--gold);
+  font-style: italic;
+}
+
+.profile-pseudo {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.profile-id {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--border-bright);
+  margin-top: 8px;
+  padding: 4px 12px;
+  background: var(--bg3);
+  border-radius: 20px;
+}
+
+.profile-stats {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+}
+
+.stat { text-align: center; }
+.stat-num {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  color: var(--gold);
+  font-weight: 500;
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.profile-menu {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.menu-item:hover { border-color: var(--border-bright); }
+.menu-item-icon { font-size: 18px; width: 24px; text-align: center; }
+.menu-item-arrow { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+
+.menu-item.danger { color: var(--danger); border-color: rgba(192,57,43,0.2); }
+.menu-item.danger:hover { border-color: rgba(192,57,43,0.5); background: rgba(192,57,43,0.05); }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal-overlay.active {
+  display: flex;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--border-bright);
+  border-radius: 20px 20px 16px 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--gold);
+  font-style: italic;
+}
+
+.modal-close {
+  width: 32px; height: 32px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.modal-close:hover { color: var(--gold); border-color: var(--gold); }
+
+/* TOAST */
+.toast-container {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  width: calc(100% - 32px);
+  max-width: 360px;
+}
+
+.toast {
+  background: var(--bg3);
+  border: 1px solid var(--border-bright);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: toastIn 0.3s ease forwards;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.toast.success { border-color: rgba(39,174,96,0.5); }
+.toast.error { border-color: rgba(192,57,43,0.5); }
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toastOut {
+  to { opacity: 0; transform: translateY(-16px); }
+}
+
+/* UPLOAD PREVIEW */
+.upload-preview {
+  display: none;
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.upload-preview img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.upload-preview.active { display: block; }
+
+.remove-upload {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 28px; height: 28px;
+  background: rgba(0,0,0,0.7);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--text);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+
+/* LOADING */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+.spinner {
+  width: 20px; height: 20px;
+  border: 2px solid var(--border);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 10px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* EMPTY STATE */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+.empty-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.empty-sub { font-size: 13px; }
+
+/* IMAGE VIEWER */
+.img-viewer {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.95);
+  z-index: 400;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.img-viewer.active { display: flex; }
+.img-viewer img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.img-viewer-close {
+  position: absolute;
+  top: 16px; right: 16px;
+  font-size: 28px;
+  color: white;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+/* FACTION DETAIL */
+.faction-detail {
+  display: none;
+}
+
+.faction-detail.active {
+  display: block;
+}
+
+.faction-detail-header {
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(201,168,76,0.05) 0%, transparent 100%);
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  cursor: pointer;
+  margin-bottom: 12px;
+  padding: 0;
+}
+
+.back-btn:hover { color: var(--gold); }
+
+/* MARKET MODAL */
+.crypto-address {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  border-radius: 8px;
+  word-break: break-all;
+  color: var(--gold);
+  margin-top: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.crypto-address:hover { border-color: var(--gold); }
+
+/* TAGS */
+.tag {
+  display: inline-block;
+  padding: 3px 8px;
+  background: rgba(201,168,76,0.1);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--gold);
+  margin: 2px;
+}
+
+/* FILTER TABS */
+.filter-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.filter-tab {
+  padding: 6px 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.filter-tab.active {
+  background: rgba(201,168,76,0.15);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* PWA INSTALL BANNER */
+.install-banner {
+  position: fixed;
+  bottom: 70px;
+  left: 16px; right: 16px;
+  background: var(--bg2);
+  border: 1px solid var(--border-bright);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 99;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  animation: slideUp 0.3s ease;
+}
+
+.install-banner.hidden { display: none; }
+
+.install-banner-text { flex: 1; font-size: 13px; }
+.install-banner-title { font-weight: 700; color: var(--gold); font-size: 13px; }
+.install-banner-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+.install-btn {
+  padding: 8px 14px;
+  background: var(--gold);
+  border: none;
+  border-radius: 8px;
+  color: var(--bg);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.install-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* NOTIF PANEL */
+.notif-panel {
+  position: fixed;
+  top: 56px; right: 0;
+  width: min(320px, 100vw);
+  max-height: calc(100vh - 56px);
+  background: var(--bg2);
+  border-left: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 150;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+}
+
+.notif-panel.open { transform: translateX(0); }
+
+.notif-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--gold);
+  font-style: italic;
+}
+
+.notif-item {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  transition: background 0.2s;
+}
+
+.notif-item:hover { background: var(--bg3); }
+.notif-item.unread { border-left: 2px solid var(--gold); }
+.notif-item-meta { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+
+@media (max-width: 380px) {
+  .factions-grid { grid-template-columns: 1fr 1fr; }
+  .market-grid { grid-template-columns: 1fr 1fr; }
+  .profile-stats { gap: 16px; }
+  .compose-actions { gap: 6px; }
+  .post-actions { gap: 10px; }
+}
+
+@media (max-width: 320px) {
+  .topbar-section { display: none; }
+  .factions-grid { grid-template-columns: 1fr 1fr; }
+  .market-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- IMAGE VIEWER -->
+<div class="img-viewer" id="imgViewer">
+  <button class="img-viewer-close" onclick="closeImageViewer()">✕</button>
+  <img id="imgViewerSrc" src="" alt="">
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- NOTIF PANEL -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-header">Notifications</div>
+  <div id="notifList">
+    <div class="loading"><div class="spinner"></div></div>
+  </div>
+</div>
+
+<!-- INSTALL BANNER -->
+<div class="install-banner hidden" id="installBanner">
+  <div class="install-banner-text">
+    <div class="install-banner-title">📱 Installer X-ZONE</div>
+    <div class="install-banner-sub">Accès instantané, fonctionne hors ligne</div>
+  </div>
+  <button class="install-btn" onclick="installPWA()">Installer</button>
+  <button class="install-close" onclick="document.getElementById('installBanner').classList.add('hidden')">✕</button>
+</div>
+
+<!-- ===== AUTH PAGE ===== -->
+<div id="auth-page" class="page active">
+  <div class="auth-logo">
+    <div class="logo-text">X—ZONE</div>
+    <div class="tagline">// Espace Libre & Anonyme</div>
+  </div>
+
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Connexion</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Créer un compte</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div class="auth-form active" id="loginForm">
+      <div class="form-group">
+        <label class="form-label">Pseudonyme</label>
+        <input type="text" class="form-input" id="loginPseudo" placeholder="Votre pseudo..." autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mot de passe</label>
+        <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn btn-gold" onclick="login()">Entrer dans la zone</button>
+      <button class="fingerprint-btn" onclick="loginWithFingerprint()">
+        <span class="fingerprint-icon">🪪</span>
+        Connexion par empreinte digitale
+      </button>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div class="auth-form" id="registerForm">
+      <div class="form-group">
+        <label class="form-label">Prénom</label>
+        <input type="text" class="form-input" id="regPrenom" placeholder="Votre prénom..." autocomplete="given-name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nom</label>
+        <input type="text" class="form-input" id="regNom" placeholder="Votre nom..." autocomplete="family-name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pseudonyme</label>
+        <input type="text" class="form-input" id="regPseudo" placeholder="Choisissez un pseudo..." autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mot de passe</label>
+        <input type="password" class="form-input" id="regPassword" placeholder="Minimum 6 caractères..." autocomplete="new-password">
+      </div>
+      <button class="btn btn-gold" onclick="register()">Rejoindre X-ZONE</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== APP PAGE ===== -->
+<div id="app-page" class="page">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">X</div>
+    <div class="topbar-section" id="topbarSection">Le Flux</div>
+    <div class="topbar-actions">
+      <button class="icon-btn notif-dot" onclick="toggleNotif()" title="Notifications">🔔</button>
+      <button class="icon-btn" onclick="toggleSearch()" title="Rechercher">🔍</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- FLUX SECTION -->
+    <div class="section active" id="section-flux">
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="setFilter('all', this)">🔥 Tout</button>
+        <button class="filter-tab" onclick="setFilter('top', this)">⭐ Top</button>
+        <button class="filter-tab" onclick="setFilter('media', this)">📸 Médias</button>
+        <button class="filter-tab" onclick="setFilter('latest', this)">🕐 Récent</button>
+      </div>
+
+      <div class="compose-area">
+        <div class="compose-inner">
+          <div class="upload-preview" id="uploadPreview">
+            <img id="uploadPreviewImg" src="" alt="">
+            <button class="remove-upload" onclick="removeUpload()">✕</button>
+          </div>
+          <textarea class="compose-textarea" id="postText" placeholder="Exprimez-vous librement..."></textarea>
+          <div class="compose-actions">
+            <span class="compose-meta">ID: <span id="sessionId">—</span></span>
+            <button class="mini-btn" onclick="document.getElementById('imageUploadInput').click()">📸</button>
+            <input type="file" id="imageUploadInput" accept="image/*" style="display:none" onchange="handleImageSelect(event)">
+            <button class="send-btn" onclick="submitPost()">Poster</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="posts-feed" id="postsFeed">
+        <div class="loading"><div class="spinner"></div>Chargement...</div>
+      </div>
+    </div>
+
+    <!-- FACTIONS SECTION -->
+    <div class="section" id="section-factions">
+      <div class="faction-detail" id="factionDetail">
+        <!-- Dynamic content -->
+      </div>
+
+      <div id="factionsMain">
+        <div class="factions-header">
+          <div class="section-title">Factions</div>
+          <div class="search-bar">
+            <input type="text" class="search-input" id="factionSearch" placeholder="#tag ou nom..." oninput="filterFactions(this.value)">
+          </div>
+        </div>
+        <div class="factions-grid" id="factionsGrid">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MARKET SECTION -->
+    <div class="section" id="section-market">
+      <div class="market-header">
+        <div class="section-title">Black Market</div>
+        <button class="mini-btn" onclick="openModal('createListingModal')">+ Annonce</button>
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="setMarketFilter('all', this)">Tout</button>
+        <button class="filter-tab" onclick="setMarketFilter('BTC', this)">₿ Bitcoin</button>
+        <button class="filter-tab" onclick="setMarketFilter('XMR', this)">⬡ Monero</button>
+        <button class="filter-tab" onclick="setMarketFilter('verified', this)">✔ Vérifiés</button>
+      </div>
+      <div class="market-grid" id="marketGrid">
+        <div class="loading" style="grid-column:1/-1"><div class="spinner"></div>Chargement...</div>
+      </div>
+    </div>
+
+    <!-- PROFIL SECTION -->
+    <div class="section" id="section-profil">
+      <div class="profile-section">
+        <div class="profile-avatar" id="profileAvatarDisplay">?</div>
+        <div class="profile-name" id="profileNameDisplay">—</div>
+        <div class="profile-pseudo" id="profilePseudoDisplay">@—</div>
+        <div class="profile-id" id="profileIdDisplay">ID: —</div>
+        <div class="profile-stats">
+          <div class="stat">
+            <div class="stat-num" id="statPosts">0</div>
+            <div class="stat-label">Posts</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num" id="statVotes">0</div>
+            <div class="stat-label">Votes</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num" id="statFactions">0</div>
+            <div class="stat-label">Factions</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-menu">
+        <div class="menu-item" onclick="openModal('notifSettingsModal')">
+          <span class="menu-item-icon">🔔</span>
+          Notifications Push
+          <span class="menu-item-arrow">›</span>
+        </div>
+        <div class="menu-item" onclick="openModal('changePasswordModal')">
+          <span class="menu-item-icon">🔐</span>
+          Changer le mot de passe
+          <span class="menu-item-arrow">›</span>
+        </div>
+        <div class="menu-item" onclick="setupFingerprint()">
+          <span class="menu-item-icon">🪪</span>
+          Configurer l'empreinte digitale
+          <span class="menu-item-arrow">›</span>
+        </div>
+        <div class="menu-item" onclick="openModal('aboutModal')">
+          <span class="menu-item-icon">ℹ️</span>
+          À propos de X-ZONE
+          <span class="menu-item-arrow">›</span>
+        </div>
+        <div class="menu-item danger" onclick="logout()">
+          <span class="menu-item-icon">🚪</span>
+          Déconnexion
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end content -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchSection('flux', this)">
+      <span class="nav-icon">⚡</span>
+      <span class="nav-label">Flux</span>
+    </button>
+    <button class="nav-item" onclick="switchSection('factions', this)">
+      <span class="nav-icon">🏴</span>
+      <span class="nav-label">Factions</span>
+    </button>
+    <button class="nav-item" onclick="switchSection('market', this)">
+      <span class="nav-icon">🛒</span>
+      <span class="nav-label">Market</span>
+    </button>
+    <button class="nav-item" onclick="switchSection('profil', this)">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">Profil</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- CREATE FACTION -->
+<div class="modal-overlay" id="createFactionModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Créer une Faction</span>
+      <button class="modal-close" onclick="closeModal('createFactionModal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nom de la faction</label>
+      <input type="text" class="form-input" id="factionName" placeholder="Ex: Crypto Cartel">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Emoji</label>
+      <input type="text" class="form-input" id="factionEmoji" placeholder="🏴" maxlength="2">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tags (séparés par des espaces)</label>
+      <input type="text" class="form-input" id="factionTags" placeholder="#crypto #trading #anon">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea class="form-input" id="factionDesc" rows="3" placeholder="Décrivez votre faction..." style="resize:vertical"></textarea>
+    </div>
+    <button class="btn btn-gold" onclick="createFaction()">Créer la Faction</button>
+  </div>
+</div>
+
+<!-- CREATE LISTING -->
+<div class="modal-overlay" id="createListingModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Nouvelle Annonce</span>
+      <button class="modal-close" onclick="closeModal('createListingModal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Titre</label>
+      <input type="text" class="form-input" id="listingTitle" placeholder="Ce que vous vendez...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea class="form-input" id="listingDesc" rows="3" placeholder="Détails..." style="resize:vertical"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Prix</label>
+      <input type="text" class="form-input" id="listingPrice" placeholder="Ex: 0.001 BTC ou 5 XMR">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Crypto acceptée</label>
+      <select class="form-input" id="listingCrypto" style="cursor:pointer">
+        <option value="BTC">₿ Bitcoin (BTC)</option>
+        <option value="XMR">⬡ Monero (XMR)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Adresse crypto</label>
+      <input type="text" class="form-input" id="listingAddress" placeholder="Votre adresse de réception...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Image (optionnel)</label>
+      <button class="mini-btn" style="width:100%;padding:12px" onclick="document.getElementById('listingImgInput').click()">📸 Ajouter une image</button>
+      <input type="file" id="listingImgInput" accept="image/*" style="display:none" onchange="handleListingImage(event)">
+      <div id="listingImgPreview" style="display:none;margin-top:8px">
+        <img id="listingImgPreviewImg" style="width:100%;border-radius:8px;max-height:160px;object-fit:cover">
+      </div>
+    </div>
+    <button class="btn btn-gold" onclick="createListing()">Publier l'annonce</button>
+  </div>
+</div>
+
+<!-- NOTIF SETTINGS -->
+<div class="modal-overlay" id="notifSettingsModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Notifications</span>
+      <button class="modal-close" onclick="closeModal('notifSettingsModal')">✕</button>
+    </div>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px">Activez les notifications push pour être alerté des nouveaux posts et messages dans vos factions.</p>
+    <button class="btn btn-gold" onclick="requestPushPermission()">Activer les notifications</button>
+    <button class="btn btn-outline" onclick="disablePush()" style="margin-top:10px">Désactiver</button>
+  </div>
+</div>
+
+<!-- CHANGE PASSWORD -->
+<div class="modal-overlay" id="changePasswordModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Changer mot de passe</span>
+      <button class="modal-close" onclick="closeModal('changePasswordModal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Ancien mot de passe</label>
+      <input type="password" class="form-input" id="oldPassword" placeholder="••••••••">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nouveau mot de passe</label>
+      <input type="password" class="form-input" id="newPassword" placeholder="••••••••">
+    </div>
+    <button class="btn btn-gold" onclick="changePassword()">Mettre à jour</button>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<div class="modal-overlay" id="aboutModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">À propos</span>
+      <button class="modal-close" onclick="closeModal('aboutModal')">✕</button>
+    </div>
+    <p style="font-family:var(--font-display);font-size:32px;color:var(--gold);font-style:italic;margin-bottom:16px">X—ZONE</p>
+    <p style="color:var(--text-muted);font-size:13px;line-height:1.7">Plateforme de communication libre et anonyme. Zéro log. Zéro censure. Powered by cryptographie et décentralisation.</p>
+    <div style="margin-top:16px;font-family:var(--font-mono);font-size:11px;color:var(--border-bright)">
+      v1.0.0 — Build 2025<br>
+      🔒 AES-256 Encrypted<br>
+      🌐 PWA Ready<br>
+      ₿ Crypto Native
+    </div>
+  </div>
+</div>
+
+<!-- LISTING DETAIL -->
+<div class="modal-overlay" id="listingDetailModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="ldTitle">—</span>
+      <button class="modal-close" onclick="closeModal('listingDetailModal')">✕</button>
+    </div>
+    <div id="ldImage" style="margin-bottom:16px;display:none">
+      <img id="ldImg" style="width:100%;border-radius:10px;max-height:240px;object-fit:cover">
+    </div>
+    <p id="ldDesc" style="font-size:14px;color:var(--text-muted);margin-bottom:16px;line-height:1.6"></p>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <span style="font-family:var(--font-mono);font-size:18px;color:var(--gold)" id="ldPrice"></span>
+      <span class="listing-badge" id="ldCrypto"></span>
+    </div>
+    <div style="font-family:var(--font-mono);font-size:12px;color:var(--text-muted);margin-bottom:6px">Adresse de paiement :</div>
+    <div class="crypto-address" id="ldAddress" onclick="copyAddress()" title="Cliquer pour copier"></div>
+    <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);margin-top:8px">📋 Cliquer pour copier l'adresse</div>
+    <div style="font-family:var(--font-mono);font-size:10px;color:var(--border-bright);margin-top:8px" id="ldSeller"></div>
+    <div style="display:flex;gap:8px;margin-top:16px" id="ldStars"></div>
+  </div>
+</div>
+
+<!-- Firebase + App Scripts -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, doc, addDoc, getDoc, getDocs, setDoc, updateDoc, query, orderBy, limit, onSnapshot, serverTimestamp, where, increment } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDHRxGdHpM2RFtvGMhXOu3slrT2JlmyNLM",
+  authDomain: "data-fae4a.firebaseapp.com",
+  databaseURL: "https://data-fae4a-default-rtdb.firebaseio.com",
+  projectId: "data-fae4a",
+  storageBucket: "data-fae4a.firebasestorage.app",
+  messagingSenderId: "1077301559347",
+  appId: "1:1077301559347:web:3405ab3bc8e1010d9e6346",
+  measurementId: "G-C631QW9NDN"
+};
+
+const CLOUDINARY = { cloudName: 'djxcqczh1', uploadPreset: 'database' };
+const VAPID_PUBLIC = 'BLCbphULBOAUvzpAvs3LjmotBJiuKc_grJmqVyxDX-z8HZo46tECs5kvJU8C9ORGUKBAQRUJesF1b96EuQ885aI';
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ===== STATE =====
+let currentUser = null;
+let currentFilter = 'all';
+let currentMarketFilter = 'all';
+let uploadedImageUrl = null;
+let listingImageUrl = null;
+let unsubPosts = null;
+let deferredPrompt = null;
+
+// ===== UTILS =====
+window.showToast = function(msg, type='info') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  const icons = { success:'✅', error:'❌', info:'ℹ️' };
+  t.innerHTML = `<span>${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => {
+    t.style.animation = 'toastOut 0.3s ease forwards';
+    setTimeout(() => t.remove(), 300);
+  }, 3000);
+};
+
+window.openModal = function(id) {
+  document.getElementById(id).classList.add('active');
+};
+
+window.closeModal = function(id) {
+  document.getElementById(id).classList.remove('active');
+  // Close if click outside
+};
+
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => {
+    if (e.target === o) o.classList.remove('active');
+  });
+});
+
+function generateId() {
+  return Math.random().toString(36).substring(2, 9).toUpperCase();
+}
+
+function hashPassword(pwd) {
+  let hash = 0;
+  for (let i = 0; i < pwd.length; i++) {
+    const char = pwd.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash).toString(16);
+}
+
+function timeAgo(ts) {
+  if (!ts) return 'maintenant';
+  const date = ts.toDate ? ts.toDate() : new Date(ts);
+  const diff = (Date.now() - date.getTime()) / 1000;
+  if (diff < 60) return 'à l\'instant';
+  if (diff < 3600) return `il y a ${Math.floor(diff/60)}min`;
+  if (diff < 86400) return `il y a ${Math.floor(diff/3600)}h`;
+  return `il y a ${Math.floor(diff/86400)}j`;
+}
+
+// ===== AUTH =====
+window.switchAuthTab = function(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => {
+    t.classList.toggle('active', (i===0 && tab==='login') || (i===1 && tab==='register'));
+  });
+  document.getElementById('loginForm').classList.toggle('active', tab==='login');
+  document.getElementById('registerForm').classList.toggle('active', tab==='register');
+};
+// Init default
+document.getElementById('loginForm').classList.add('active');
+
+window.register = async function() {
+  const prenom = document.getElementById('regPrenom').value.trim();
+  const nom = document.getElementById('regNom').value.trim();
+  const pseudo = document.getElementById('regPseudo').value.trim();
+  const password = document.getElementById('regPassword').value;
+
+  if (!prenom || !nom || !pseudo || !password) return showToast('Tous les champs sont requis', 'error');
+  if (password.length < 6) return showToast('Mot de passe trop court (min 6)', 'error');
+
+  try {
+    // Check pseudo uniqueness
+    const snap = await getDocs(query(collection(db, 'users'), where('pseudo', '==', pseudo)));
+    if (!snap.empty) return showToast('Ce pseudo est déjà pris', 'error');
+
+    const userId = generateId() + generateId();
+    const userData = {
+      prenom, nom, pseudo,
+      passwordHash: hashPassword(password),
+      userId,
+      createdAt: serverTimestamp(),
+      posts: 0,
+      votes: 0,
+      factions: 0
+    };
+
+    await setDoc(doc(db, 'users', userId), userData);
+    localStorage.setItem('xzone_user_id', userId);
+    localStorage.setItem('xzone_pseudo', pseudo);
+    
+    await loginUser({ ...userData, id: userId });
+    showToast(`Bienvenue dans X-ZONE, @${pseudo}!`, 'success');
+  } catch(e) {
+    console.error(e);
+    showToast('Erreur lors de la création du compte', 'error');
+  }
+};
+
+window.login = async function() {
+  const pseudo = document.getElementById('loginPseudo').value.trim();
+  const password = document.getElementById('loginPassword').value;
+
+  if (!pseudo || !password) return showToast('Remplissez tous les champs', 'error');
+
+  try {
+    const snap = await getDocs(query(collection(db, 'users'), where('pseudo', '==', pseudo)));
+    if (snap.empty) return showToast('Pseudo introuvable', 'error');
+
+    const userDoc = snap.docs[0];
+    const userData = userDoc.data();
+
+    if (userData.passwordHash !== hashPassword(password)) return showToast('Mot de passe incorrect', 'error');
+
+    localStorage.setItem('xzone_user_id', userDoc.id);
+    localStorage.setItem('xzone_pseudo', pseudo);
+
+    await loginUser({ ...userData, id: userDoc.id });
+    showToast(`Content de te revoir, @${pseudo}!`, 'success');
+  } catch(e) {
+    console.error(e);
+    showToast('Erreur de connexion', 'error');
+  }
+};
+
+window.loginWithFingerprint = async function() {
+  const storedUserId = localStorage.getItem('xzone_user_id');
+  if (!storedUserId) return showToast('Aucun compte enregistré sur cet appareil', 'error');
+
+  if (!window.PublicKeyCredential) return showToast('Biométrie non supportée sur ce navigateur', 'error');
+
+  try {
+    // Check for stored credential
+    const storedCredId = localStorage.getItem('xzone_cred_id');
+    if (!storedCredId) return showToast('Configurez d\'abord l\'empreinte dans votre profil', 'error');
+
+    const credential = await navigator.credentials.get({
+      publicKey: {
+        challenge: new Uint8Array(32),
+        allowCredentials: [{
+          type: 'public-key',
+          id: Uint8Array.from(atob(storedCredId), c => c.charCodeAt(0))
+        }],
+        userVerification: 'required',
+        timeout: 60000
+      }
+    });
+
+    if (credential) {
+      const snap = await getDoc(doc(db, 'users', storedUserId));
+      if (!snap.exists()) return showToast('Utilisateur introuvable', 'error');
+      const userData = snap.data();
+      await loginUser({ ...userData, id: storedUserId });
+      showToast(`Connecté via empreinte, @${userData.pseudo}!`, 'success');
+    }
+  } catch(e) {
+    console.error(e);
+    showToast('Échec de l\'authentification biométrique', 'error');
+  }
+};
+
+window.setupFingerprint = async function() {
+  if (!window.PublicKeyCredential) return showToast('Biométrie non supportée sur ce navigateur', 'error');
+  if (!currentUser) return;
+
+  try {
+    const credential = await navigator.credentials.create({
+      publicKey: {
+        challenge: new Uint8Array(32),
+        rp: { name: 'X-ZONE', id: location.hostname || 'localhost' },
+        user: {
+          id: new TextEncoder().encode(currentUser.id),
+          name: currentUser.pseudo,
+          displayName: `${currentUser.prenom} ${currentUser.nom}`
+        },
+        pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
+        authenticatorSelection: { userVerification: 'required', authenticatorAttachment: 'platform' },
+        timeout: 60000
+      }
+    });
+
+    if (credential) {
+      const credId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
+      localStorage.setItem('xzone_cred_id', credId);
+      showToast('Empreinte digitale configurée!', 'success');
+    }
+  } catch(e) {
+    console.error(e);
+    showToast('Impossible de configurer la biométrie', 'error');
+  }
+};
+
+async function loginUser(userData) {
+  currentUser = userData;
+  
+  // Update UI
+  const initial = (userData.prenom || '?')[0].toUpperCase();
+  document.getElementById('profileAvatarDisplay').textContent = initial;
+  document.getElementById('profileNameDisplay').textContent = `${userData.prenom} ${userData.nom}`;
+  document.getElementById('profilePseudoDisplay').textContent = `@${userData.pseudo}`;
+  document.getElementById('profileIdDisplay').textContent = `ID: ${userData.userId || userData.id}`;
+  document.getElementById('sessionId').textContent = userData.pseudo;
+  document.getElementById('statPosts').textContent = userData.posts || 0;
+  document.getElementById('statVotes').textContent = userData.votes || 0;
+  document.getElementById('statFactions').textContent = userData.factions || 0;
+
+  // Switch page
+  document.getElementById('auth-page').classList.remove('active');
+  document.getElementById('app-page').classList.add('active');
+
+  // Load data
+  loadPosts();
+  loadFactions();
+  loadMarket();
+  loadNotifications();
+
+  // Register push
+  await tryRegisterPush();
+}
+
+window.logout = function() {
+  if (unsubPosts) unsubPosts();
+  currentUser = null;
+  localStorage.removeItem('xzone_user_id');
+  document.getElementById('app-page').classList.remove('active');
+  document.getElementById('auth-page').classList.add('active');
+  showToast('Déconnecté', 'info');
+};
+
+// Auto login check
+async function autoLogin() {
+  const savedId = localStorage.getItem('xzone_user_id');
+  if (!savedId) return;
+  try {
+    const snap = await getDoc(doc(db, 'users', savedId));
+    if (snap.exists()) {
+      await loginUser({ ...snap.data(), id: savedId });
+    }
+  } catch(e) { console.error(e); }
+}
+
+// ===== POSTS =====
+window.submitPost = async function() {
+  if (!currentUser) return;
+  const text = document.getElementById('postText').value.trim();
+  if (!text && !uploadedImageUrl) return showToast('Écrivez quelque chose!', 'error');
+
+  const postData = {
+    text,
+    imageUrl: uploadedImageUrl || null,
+    pseudo: currentUser.pseudo,
+    userId: currentUser.id,
+    score: 0,
+    upvotes: 0,
+    downvotes: 0,
+    createdAt: serverTimestamp()
+  };
+
+  try {
+    await addDoc(collection(db, 'posts'), postData);
+    document.getElementById('postText').value = '';
+    removeUpload();
+    // Increment posts count
+    await updateDoc(doc(db, 'users', currentUser.id), { posts: increment(1) });
+    document.getElementById('statPosts').textContent = parseInt(document.getElementById('statPosts').textContent) + 1;
+    showToast('Post publié!', 'success');
+  } catch(e) {
+    console.error(e);
+    showToast('Erreur lors de la publication', 'error');
+  }
+};
+
+function loadPosts() {
+  if (unsubPosts) unsubPosts();
+  const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(50));
+  unsubPosts = onSnapshot(q, snap => {
+    let posts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    if (currentFilter === 'top') posts.sort((a,b) => (b.score||0) - (a.score||0));
+    else if (currentFilter === 'media') posts = posts.filter(p => p.imageUrl);
+
+    renderPosts(posts);
+  });
+}
+
+function renderPosts(posts) {
+  const feed = document.getElementById('postsFeed');
+  if (!posts.length) {
+    feed.innerHTML = `<div class="empty-state"><div class="empty-icon">⚡</div><div class="empty-title">Aucun post</div><div class="empty-sub">Soyez le premier à publier</div></div>`;
+    return;
+  }
+
+  feed.innerHTML = posts.map(p => {
+    const initial = (p.pseudo || '?')[0].toUpperCase();
+    const userVotes = JSON.parse(localStorage.getItem('xzone_votes') || '{}');
+    const myVote = userVotes[p.id];
+    return `
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-avatar">${initial}</div>
+        <div class="post-meta">
+          <div class="post-pseudo">@${p.pseudo || 'anon'}</div>
+          <div class="post-time">${timeAgo(p.createdAt)}</div>
+        </div>
+      </div>
+      ${p.text ? `<div class="post-text">${escapeHtml(p.text)}</div>` : ''}
+      ${p.imageUrl ? `<img class="post-image" src="${p.imageUrl}" alt="" onclick="openImageViewer('${p.imageUrl}')">` : ''}
+      <div class="post-actions">
+        <button class="vote-btn ${myVote==='up'?'active-up':''}" onclick="vote('${p.id}', 'up')">▲ <span>${p.upvotes||0}</span></button>
+        <span class="post-score">${p.score||0}</span>
+        <button class="vote-btn ${myVote==='down'?'active-down':''}" onclick="vote('${p.id}', 'down')">▼ <span>${p.downvotes||0}</span></button>
+        <button class="vote-btn" style="margin-left:auto" onclick="sharePost('${p.id}')">↗ Partager</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escapeHtml(text) {
+  const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
+  return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+window.vote = async function(postId, type) {
+  const votes = JSON.parse(localStorage.getItem('xzone_votes') || '{}');
+  if (votes[postId] === type) return; // Already voted
+
+  const delta = type === 'up' ? 1 : -1;
+  const prevDelta = votes[postId] ? (votes[postId]==='up' ? -1 : 1) : 0;
+
+  votes[postId] = type;
+  localStorage.setItem('xzone_votes', JSON.stringify(votes));
+
+  try {
+    const updates = { score: increment(delta + prevDelta) };
+    if (type === 'up') updates.upvotes = increment(1);
+    else updates.downvotes = increment(1);
+    if (prevDelta) {
+      if (votes[postId]==='up') updates.downvotes = increment(-1);
+      else updates.upvotes = increment(-1);
+    }
+    await updateDoc(doc(db, 'posts', postId), updates);
+  } catch(e) { console.error(e); }
+};
+
+window.sharePost = function(postId) {
+  if (navigator.share) {
+    navigator.share({ title: 'X-ZONE', text: 'Regarde ce post sur X-ZONE!', url: window.location.href });
+  } else {
+    navigator.clipboard.writeText(window.location.href + '?post=' + postId);
+    showToast('Lien copié!', 'success');
+  }
+};
+
+window.setFilter = function(filter, el) {
+  currentFilter = filter;
+  document.querySelectorAll('#section-flux .filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  loadPosts();
+};
+
+// ===== IMAGE UPLOAD =====
+window.handleImageSelect = async function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  showToast('Upload en cours...', 'info');
+
+  try {
+    const url = await uploadToCloudinary(file);
+    uploadedImageUrl = url;
+    document.getElementById('uploadPreviewImg').src = url;
+    document.getElementById('uploadPreview').classList.add('active');
+    showToast('Image uploadée!', 'success');
+  } catch(err) {
+    showToast('Erreur upload image', 'error');
+  }
+};
+
+window.removeUpload = function() {
+  uploadedImageUrl = null;
+  document.getElementById('uploadPreview').classList.remove('active');
+  document.getElementById('uploadPreviewImg').src = '';
+  document.getElementById('imageUploadInput').value = '';
+};
+
+async function uploadToCloudinary(file) {
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLOUDINARY.uploadPreset);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY.cloudName}/image/upload`, { method:'POST', body: fd });
+  const data = await res.json();
+  if (!data.secure_url) throw new Error('Upload failed');
+  return data.secure_url;
+}
+
+window.handleListingImage = async function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    listingImageUrl = await uploadToCloudinary(file);
+    document.getElementById('listingImgPreviewImg').src = listingImageUrl;
+    document.getElementById('listingImgPreview').style.display = 'block';
+  } catch(e) { showToast('Erreur upload', 'error'); }
+};
+
+// ===== IMAGE VIEWER =====
+window.openImageViewer = function(url) {
+  document.getElementById('imgViewerSrc').src = url;
+  document.getElementById('imgViewer').classList.add('active');
+};
+
+window.closeImageViewer = function() {
+  document.getElementById('imgViewer').classList.remove('active');
+};
+
+// ===== FACTIONS =====
+async function loadFactions() {
+  try {
+    const snap = await getDocs(collection(db, 'factions'));
+    const factions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderFactions(factions);
+  } catch(e) { console.error(e); }
+}
+
+function renderFactions(factions) {
+  const grid = document.getElementById('factionsGrid');
+  grid.innerHTML = `
+    <button class="create-faction-btn" onclick="openModal('createFactionModal')">
+      <span style="font-size:24px">+</span>
+      <span>Créer une Faction</span>
+    </button>
+    ${factions.map(f => `
+    <div class="faction-card" onclick="openFaction('${f.id}')">
+      <div class="faction-emoji">${f.emoji || '🏴'}</div>
+      <div class="faction-name">${escapeHtml(f.name || '')}</div>
+      <div class="faction-tag">${(f.tags || '').split(' ').slice(0,2).map(t => `<span class="tag">${t}</span>`).join('')}</div>
+      <div class="faction-members">👥 ${f.members || 1} membres</div>
+    </div>`).join('')}
+  `;
+}
+
+window.filterFactions = function(query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('.faction-card:not(.create-faction-btn)').forEach(card => {
+    const text = card.textContent.toLowerCase();
+    card.style.display = text.includes(q) ? '' : 'none';
+  });
+};
+
+window.openFaction = async function(factionId) {
+  try {
+    const snap = await getDoc(doc(db, 'factions', factionId));
+    if (!snap.exists()) return;
+    const f = snap.data();
+
+    const detail = document.getElementById('factionDetail');
+    const main = document.getElementById('factionsMain');
+    
+    // Load faction posts
+    const postsSnap = await getDocs(query(collection(db, 'factions', factionId, 'posts'), orderBy('createdAt', 'desc'), limit(30)));
+    const posts = postsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    detail.innerHTML = `
+      <div class="faction-detail-header">
+        <button class="back-btn" onclick="closeFaction()">← Retour</button>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-size:36px">${f.emoji || '🏴'}</span>
+          <div>
+            <div style="font-size:18px;font-weight:700">${escapeHtml(f.name)}</div>
+            <div style="font-size:12px;color:var(--text-muted)">${f.tags || ''}</div>
+          </div>
+        </div>
+        <p style="font-size:13px;color:var(--text-muted);margin-top:10px;line-height:1.5">${escapeHtml(f.description || '')}</p>
+      </div>
+      <div class="compose-area">
+        <div class="compose-inner">
+          <textarea class="compose-textarea" id="factionPostText" placeholder="Poster dans cette faction..."></textarea>
+          <div class="compose-actions">
+            <button class="send-btn" onclick="submitFactionPost('${factionId}')">Poster</button>
+          </div>
+        </div>
+      </div>
+      <div class="posts-feed" id="factionPostsFeed">
+        ${posts.length ? posts.map(p => `
+          <div class="post-card">
+            <div class="post-header">
+              <div class="post-avatar">${(p.pseudo || '?')[0].toUpperCase()}</div>
+              <div class="post-meta">
+                <div class="post-pseudo">@${p.pseudo || 'anon'}</div>
+                <div class="post-time">${timeAgo(p.createdAt)}</div>
+              </div>
+            </div>
+            ${p.text ? `<div class="post-text">${escapeHtml(p.text)}</div>` : ''}
+          </div>`).join('') : '<div class="empty-state"><div class="empty-icon">🏴</div><div class="empty-title">Aucun post</div></div>'}
+      </div>
+    `;
+
+    detail.classList.add('active');
+    main.style.display = 'none';
+  } catch(e) { console.error(e); }
+};
+
+window.closeFaction = function() {
+  document.getElementById('factionDetail').classList.remove('active');
+  document.getElementById('factionsMain').style.display = '';
+};
+
+window.submitFactionPost = async function(factionId) {
+  const text = document.getElementById('factionPostText').value.trim();
+  if (!text) return;
+  try {
+    await addDoc(collection(db, 'factions', factionId, 'posts'), {
+      text, pseudo: currentUser.pseudo, userId: currentUser.id, createdAt: serverTimestamp()
+    });
+    document.getElementById('factionPostText').value = '';
+    openFaction(factionId);
+    showToast('Posté!', 'success');
+  } catch(e) { showToast('Erreur', 'error'); }
+};
+
+window.createFaction = async function() {
+  const name = document.getElementById('factionName').value.trim();
+  const emoji = document.getElementById('factionEmoji').value || '🏴';
+  const tags = document.getElementById('factionTags').value.trim();
+  const description = document.getElementById('factionDesc').value.trim();
+
+  if (!name) return showToast('Nom requis', 'error');
+
+  try {
+    await addDoc(collection(db, 'factions'), {
+      name, emoji, tags, description,
+      ownerId: currentUser.id,
+      ownerPseudo: currentUser.pseudo,
+      members: 1,
+      createdAt: serverTimestamp()
+    });
+    closeModal('createFactionModal');
+    loadFactions();
+    showToast(`Faction "${name}" créée!`, 'success');
+    document.getElementById('factionName').value = '';
+    document.getElementById('factionEmoji').value = '';
+    document.getElementById('factionTags').value = '';
+    document.getElementById('factionDesc').value = '';
+  } catch(e) {
+    console.error(e);
+    showToast('Erreur création faction', 'error');
+  }
+};
+
+// ===== MARKET =====
+async function loadMarket() {
+  try {
+    const snap = await getDocs(query(collection(db, 'listings'), orderBy('createdAt', 'desc'), limit(40)));
+    let listings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    if (currentMarketFilter !== 'all') {
+      if (currentMarketFilter === 'verified') listings = listings.filter(l => l.verified);
+      else listings = listings.filter(l => l.crypto === currentMarketFilter);
+    }
+    
+    renderMarket(listings);
+  } catch(e) { console.error(e); }
+}
+
+function renderMarket(listings) {
+  const grid = document.getElementById('marketGrid');
+  if (!listings.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🛒</div><div class="empty-title">Aucune annonce</div><div class="empty-sub">Soyez le premier à vendre</div></div>`;
+    return;
+  }
+  grid.innerHTML = listings.map(l => `
+    <div class="listing-card" onclick="openListing(${JSON.stringify(l).replace(/"/g,'&quot;')})">
+      <div class="listing-img">
+        ${l.imageUrl ? `<img src="${l.imageUrl}" alt="">` : '🏷️'}
+      </div>
+      <div class="listing-body">
+        <div class="listing-title">${escapeHtml(l.title || '')}</div>
+        <div class="listing-price">${l.crypto === 'BTC' ? '₿' : '⬡'} ${escapeHtml(l.price || '')}</div>
+        ${l.verified ? '<div class="listing-badge">✔ VÉRIFIÉ</div>' : ''}
+      </div>
+    </div>`).join('');
+}
+
+window.openListing = function(listing) {
+  document.getElementById('ldTitle').textContent = listing.title || '';
+  document.getElementById('ldDesc').textContent = listing.description || '';
+  document.getElementById('ldPrice').textContent = listing.price || '';
+  document.getElementById('ldCrypto').textContent = listing.crypto || '';
+  document.getElementById('ldAddress').textContent = listing.address || '—';
+  document.getElementById('ldSeller').textContent = `Vendeur: @${listing.sellerPseudo || 'anon'}`;
+  
+  if (listing.imageUrl) {
+    document.getElementById('ldImage').style.display = 'block';
+    document.getElementById('ldImg').src = listing.imageUrl;
+  } else {
+    document.getElementById('ldImage').style.display = 'none';
+  }
+
+  // Rating stars
+  const stars = listing.rating || 0;
+  document.getElementById('ldStars').innerHTML = [1,2,3,4,5].map(i => 
+    `<span style="font-size:20px;cursor:pointer;color:${i<=stars?'var(--gold)':'var(--border)'}" onclick="rateListing('${listing.id}',${i})">${i<=stars?'★':'☆'}</span>`
+  ).join('');
+
+  openModal('listingDetailModal');
+};
+
+window.rateListing = async function(id, stars) {
+  try {
+    await updateDoc(doc(db, 'listings', id), { rating: stars });
+    showToast(`Noté ${stars}/5`, 'success');
+  } catch(e) { console.error(e); }
+};
+
+window.copyAddress = function() {
+  const addr = document.getElementById('ldAddress').textContent;
+  navigator.clipboard.writeText(addr).then(() => showToast('Adresse copiée!', 'success'));
+};
+
+window.setMarketFilter = function(filter, el) {
+  currentMarketFilter = filter;
+  document.querySelectorAll('#section-market .filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  loadMarket();
+};
+
+window.createListing = async function() {
+  const title = document.getElementById('listingTitle').value.trim();
+  const desc = document.getElementById('listingDesc').value.trim();
+  const price = document.getElementById('listingPrice').value.trim();
+  const crypto = document.getElementById('listingCrypto').value;
+  const address = document.getElementById('listingAddress').value.trim();
+
+  if (!title || !price || !address) return showToast('Titre, prix et adresse requis', 'error');
+
+  try {
+    await addDoc(collection(db, 'listings'), {
+      title, description: desc, price, crypto, address,
+      imageUrl: listingImageUrl || null,
+      sellerId: currentUser.id,
+      sellerPseudo: currentUser.pseudo,
+      verified: false,
+      rating: 0,
+      createdAt: serverTimestamp()
+    });
+    closeModal('createListingModal');
+    loadMarket();
+    showToast('Annonce publiée!', 'success');
+    // Reset
+    ['listingTitle','listingDesc','listingPrice','listingAddress'].forEach(id => document.getElementById(id).value = '');
+    listingImageUrl = null;
+    document.getElementById('listingImgPreview').style.display = 'none';
+  } catch(e) {
+    console.error(e);
+    showToast('Erreur publication annonce', 'error');
+  }
+};
+
+// ===== NAVIGATION =====
+window.switchSection = function(section, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('section-' + section).classList.add('active');
+  el.classList.add('active');
+  
+  const labels = { flux: 'Le Flux', factions: 'Factions', market: 'Black Market', profil: 'Profil' };
+  document.getElementById('topbarSection').textContent = labels[section] || '';
+};
+
+// ===== SEARCH TOGGLE =====
+window.toggleSearch = function() {
+  const s = document.getElementById('factionSearch');
+  if (document.getElementById('section-factions').classList.contains('active')) {
+    s.focus();
+  }
+  showToast('Utilisez la barre de recherche dans Factions', 'info');
+};
+
+// ===== NOTIFICATIONS =====
+async function loadNotifications() {
+  const list = document.getElementById('notifList');
+  try {
+    const snap = await getDocs(query(collection(db, 'notifications'), where('userId', '==', currentUser.id), orderBy('createdAt', 'desc'), limit(20)));
+    const notifs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    if (!notifs.length) {
+      list.innerHTML = '<div class="loading" style="font-size:12px">Aucune notification</div>';
+      return;
+    }
+    
+    list.innerHTML = notifs.map(n => `
+      <div class="notif-item ${n.read ? '' : 'unread'}">
+        <div>${escapeHtml(n.message || '')}</div>
+        <div class="notif-item-meta">${timeAgo(n.createdAt)}</div>
+      </div>`).join('');
+  } catch(e) {
+    list.innerHTML = '<div class="loading" style="font-size:12px">Aucune notification</div>';
+  }
+}
+
+window.toggleNotif = function() {
+  document.getElementById('notifPanel').classList.toggle('open');
+  // Close on outside click
+  setTimeout(() => {
+    document.addEventListener('click', function handler(e) {
+      if (!document.getElementById('notifPanel').contains(e.target) && !e.target.closest('.icon-btn')) {
+        document.getElementById('notifPanel').classList.remove('open');
+        document.removeEventListener('click', handler);
+      }
+    });
+  }, 10);
+};
+
+// ===== PUSH NOTIFICATIONS =====
+async function tryRegisterPush() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  if (Notification.permission === 'denied') return;
+  if (Notification.permission === 'granted') {
+    await registerPushSubscription();
+  }
+}
+
+window.requestPushPermission = async function() {
+  const permission = await Notification.requestPermission();
+  if (permission === 'granted') {
+    await registerPushSubscription();
+    showToast('Notifications activées!', 'success');
+    closeModal('notifSettingsModal');
+  } else {
+    showToast('Permission refusée', 'error');
+  }
+};
+
+async function registerPushSubscription() {
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC)
+    });
+    
+    // Save subscription to Firestore
+    await setDoc(doc(db, 'push_subscriptions', currentUser.id), {
+      subscription: JSON.stringify(sub),
+      userId: currentUser.id,
+      pseudo: currentUser.pseudo,
+      updatedAt: serverTimestamp()
+    });
+  } catch(e) { console.error('Push registration failed:', e); }
+}
+
+window.disablePush = async function() {
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) await sub.unsubscribe();
+    showToast('Notifications désactivées', 'info');
+    closeModal('notifSettingsModal');
+  } catch(e) { console.error(e); }
+};
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+  return outputArray;
+}
+
+// ===== CHANGE PASSWORD =====
+window.changePassword = async function() {
+  const oldPwd = document.getElementById('oldPassword').value;
+  const newPwd = document.getElementById('newPassword').value;
+  
+  if (!oldPwd || !newPwd) return showToast('Remplissez tous les champs', 'error');
+  if (newPwd.length < 6) return showToast('Nouveau mot de passe trop court', 'error');
+  if (hashPassword(oldPwd) !== currentUser.passwordHash) return showToast('Ancien mot de passe incorrect', 'error');
+  
+  try {
+    const newHash = hashPassword(newPwd);
+    await updateDoc(doc(db, 'users', currentUser.id), { passwordHash: newHash });
+    currentUser.passwordHash = newHash;
+    closeModal('changePasswordModal');
+    showToast('Mot de passe mis à jour!', 'success');
+    document.getElementById('oldPassword').value = '';
+    document.getElementById('newPassword').value = '';
+  } catch(e) { showToast('Erreur', 'error'); }
+};
+
+// ===== PWA INSTALL =====
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  setTimeout(() => document.getElementById('installBanner').classList.remove('hidden'), 3000);
+});
+
+window.installPWA = function() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(res => {
+    deferredPrompt = null;
+    document.getElementById('installBanner').classList.add('hidden');
+    if (res.outcome === 'accepted') showToast('X-ZONE installé!', 'success');
+  });
+};
+
+// ===== SERVICE WORKER =====
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(e => console.log('SW not found:', e));
+}
+
+// ===== KEYBOARD EVENTS =====
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+    document.getElementById('imgViewer').classList.remove('active');
+    document.getElementById('notifPanel').classList.remove('open');
+  }
+  if (e.ctrlKey && e.key === 'Enter') {
+    const activeSection = document.querySelector('.section.active');
+    if (activeSection && activeSection.id === 'section-flux') submitPost();
+  }
+});
+
+// ===== INIT =====
+autoLogin();
+
+</script>
+</body>
+</html>

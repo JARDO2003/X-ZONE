@@ -1,0 +1,27 @@
+{
+  "name": "X-ZONE",
+  "short_name": "X-ZONE",
+  "description": "Forum anonyme radical — Espace Libre",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#0a0a0a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%23080808'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23c9a84c' font-size='100' font-family='serif' font-style='italic'>X</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%23080808'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23c9a84c' font-size='280' font-family='serif' font-style='italic'>X</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["social", "news"],
+  "screenshots": [],
+  "prefer_related_applications": false
+}
