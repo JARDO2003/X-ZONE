@@ -1738,6 +1738,264 @@ body::before {
 
 .anon-notice span { color: var(--gold); }
 
+
+/* ===== USER PROFILE POPUP ===== */
+.user-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px);
+  z-index: 250;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+}
+.user-popup-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
+
+.user-popup {
+  background: var(--bg2);
+  border: 1px solid var(--border-bright);
+  border-radius: 20px;
+  padding: 24px;
+  width: 100%;
+  max-width: 400px;
+  animation: slideUp 0.3s ease;
+}
+
+.user-popup-avatar {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-dark), var(--bg3));
+  border: 2px solid var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--gold);
+  margin: 0 auto 12px;
+}
+
+.user-popup-name {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--gold);
+  font-style: italic;
+  margin-bottom: 4px;
+}
+
+.user-popup-pseudo {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.user-popup-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.popup-msg-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  border: none;
+  border-radius: 12px;
+  color: var(--bg);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+
+.popup-msg-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(201,168,76,0.3); }
+
+.popup-close-btn {
+  padding: 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.popup-close-btn:hover { border-color: var(--border-bright); }
+
+/* ===== ANON ROOM ===== */
+.anon-room-wrap {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 116px);
+  border-top: 1px solid var(--border);
+}
+
+.anon-room-header {
+  padding: 12px 16px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.anon-room-title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  color: var(--gold);
+  font-style: italic;
+  flex: 1;
+}
+
+.room-online {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #4ade80;
+}
+
+.room-online::before {
+  content: '';
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #4ade80;
+  animation: pulse 2s infinite;
+}
+
+.anon-room-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.room-msg {
+  display: flex;
+  gap: 8px;
+  animation: slideIn 0.2s ease;
+}
+
+.room-msg.mine { flex-direction: row-reverse; }
+
+.room-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+
+.room-bubble {
+  max-width: 75%;
+  padding: 8px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.room-msg:not(.mine) .room-bubble {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+  color: var(--text);
+}
+
+.room-msg.mine .room-bubble {
+  background: linear-gradient(135deg, var(--gold-dark), #a07828);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.room-sender {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  margin-bottom: 3px;
+  opacity: 0.7;
+}
+
+.room-msg.mine .room-sender { text-align: right; }
+
+.room-time {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  opacity: 0.5;
+  margin-top: 3px;
+  text-align: right;
+}
+
+.room-msg:not(.mine) .room-time { text-align: left; }
+
+.anon-room-input {
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  background: var(--bg2);
+  flex-shrink: 0;
+}
+
+/* MSGS TABS */
+.msgs-tabs {
+  display: flex;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.msgs-tab {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-bottom: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.msgs-tab.active {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+  background: rgba(201,168,76,0.05);
+}
+
+.post-pseudo-clickable {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.post-pseudo-clickable:hover { color: var(--gold); }
+
 </style>
 </head>
 <body>
@@ -1958,48 +2216,83 @@ body::before {
 
 
     <!-- MESSAGES SECTION -->
-    <div class="section" id="section-msgs">
-      <!-- Conversations list view -->
-      <div class="msgs-list-view" id="msgsListView">
-        <div class="msgs-header">
-          <div class="section-title">Messages</div>
-        </div>
-        <div class="anon-notice">
-          🎭 <span>Anonymat total</span> — Tous les utilisateurs s'appellent <span>User</span> + code unique. Seul vous connaissez votre identité réelle.
-        </div>
-        <div class="conv-list" id="convList">
-          <div class="loading"><div class="spinner"></div>Chargement...</div>
-        </div>
+    <div class="section" id="section-msgs" style="flex-direction:column">
+
+      <!-- TABS: Inbox / Salon -->
+      <div class="msgs-tabs">
+        <button class="msgs-tab active" id="tabInbox" onclick="switchMsgsTab('inbox')">
+          💬 Inbox
+        </button>
+        <button class="msgs-tab" id="tabRoom" onclick="switchMsgsTab('room')">
+          🌐 Salon Anonyme
+        </button>
       </div>
 
-      <!-- Chat view -->
-      <div class="chat-view" id="chatView">
-        <div class="chat-header">
-          <button class="chat-back" onclick="closeChatView()">‹</button>
-          <div class="conv-avatar" id="chatAvatar" style="width:36px;height:36px;font-size:12px">?</div>
-          <div class="chat-user-info">
-            <div class="chat-user-name">
-              <span id="chatUserName">User</span>
-              <span class="online-dot" id="chatOnlineDot" style="display:none"></span>
-            </div>
-            <div class="chat-anon-label" id="chatAnonLabel">Utilisateur anonyme</div>
+      <!-- ===== INBOX TAB ===== -->
+      <div id="inboxTab" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+
+        <!-- Conversations list -->
+        <div class="msgs-list-view" id="msgsListView" style="flex:1;overflow-y:auto">
+          <div class="anon-notice">
+            🔒 Les pseudos sont masqués en DM — chaque utilisateur s'affiche sous un <span>code anonyme</span>.
+          </div>
+          <div class="conv-list" id="convList">
+            <div class="loading"><div class="spinner"></div>Chargement...</div>
           </div>
         </div>
-        <div class="chat-messages" id="chatMessages">
-          <div class="loading"><div class="spinner"></div></div>
+
+        <!-- Chat view (DM) -->
+        <div class="chat-view" id="chatView">
+          <div class="chat-header">
+            <button class="chat-back" onclick="closeChatView()">‹</button>
+            <div class="conv-avatar" id="chatAvatar" style="width:36px;height:36px;font-size:11px">?</div>
+            <div class="chat-user-info">
+              <div class="chat-user-name">
+                <span id="chatUserName">User</span>
+                <span class="online-dot" id="chatOnlineDot" style="display:none"></span>
+              </div>
+              <div class="chat-anon-label" id="chatAnonLabel">Identité masquée</div>
+            </div>
+          </div>
+          <div class="chat-messages" id="chatMessages">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+          <div class="chat-input-area">
+            <button class="chat-attach-btn" onclick="document.getElementById('chatImgInput').click()">📎</button>
+            <input type="file" id="chatImgInput" accept="image/*" style="display:none" onchange="sendImageMsg(event)">
+            <textarea class="chat-input" id="chatInput" placeholder="Message privé..." rows="1"
+              onkeydown="handleChatKey(event)"
+              oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';notifyTyping()"></textarea>
+            <button class="chat-send-btn" onclick="sendMessage()">➤</button>
+          </div>
         </div>
-        <div class="chat-input-area">
-          <button class="chat-attach-btn" onclick="document.getElementById('chatImgInput').click()">📎</button>
-          <input type="file" id="chatImgInput" accept="image/*" style="display:none" onchange="sendImageMsg(event)">
-          <textarea class="chat-input" id="chatInput" placeholder="Message..." rows="1"
-            onkeydown="handleChatKey(event)"
-            oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';notifyTyping()"></textarea>
-          <button class="chat-send-btn" onclick="sendMessage()">➤</button>
+
+        <!-- FAB new DM -->
+        <button class="new-conv-btn" id="newConvFab" onclick="openModal('newConvModal')" title="Nouveau message">✉</button>
+      </div>
+
+      <!-- ===== SALON ANONYME TAB ===== -->
+      <div id="roomTab" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+        <div class="anon-room-wrap">
+          <div class="anon-room-header">
+            <div>
+              <div class="anon-room-title">🌐 Salon Global</div>
+              <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted)">Tout le monde est <span style="color:var(--gold)">Anonyme</span></div>
+            </div>
+            <div class="room-online" id="roomOnlineCount">0 en ligne</div>
+          </div>
+          <div class="anon-room-messages" id="roomMessages">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+          <div class="anon-room-input">
+            <textarea class="chat-input" id="roomInput" placeholder="Message anonyme..." rows="1"
+              onkeydown="handleRoomKey(event)"
+              oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+            <button class="chat-send-btn" onclick="sendRoomMessage()">➤</button>
+          </div>
         </div>
       </div>
 
-      <!-- FAB new conversation -->
-      <button class="new-conv-btn" id="newConvFab" onclick="openModal('newConvModal')" title="Nouvelle conversation">✉</button>
     </div>
 
   </div><!-- end content -->
@@ -2047,6 +2340,21 @@ body::before {
       <input type="text" class="form-input" id="userSearchInput" placeholder="Tapez un pseudo..." oninput="searchUsers(this.value)">
     </div>
     <div id="userSearchResults" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<!-- USER PROFILE POPUP -->
+<div class="user-popup-overlay" id="userPopupOverlay" onclick="if(event.target===this)closeUserPopup()">
+  <div class="user-popup">
+    <div class="user-popup-avatar" id="popupAvatar">?</div>
+    <div class="user-popup-name" id="popupName">—</div>
+    <div class="user-popup-pseudo" id="popupPseudo">@—</div>
+    <div class="user-popup-actions">
+      <button class="popup-msg-btn" onclick="popupStartConv()">
+        💬 Envoyer un message
+      </button>
+      <button class="popup-close-btn" onclick="closeUserPopup()">Fermer</button>
+    </div>
   </div>
 </div>
 
@@ -2549,9 +2857,9 @@ function renderPosts(posts) {
     return `
     <div class="post-card" data-id="${p.id}">
       <div class="post-header">
-        <div class="post-avatar">${initial}</div>
+        <div class="post-avatar" style="${!isOwner ? 'cursor:pointer' : ''}" onclick="${!isOwner ? `"openUserPopup('${p.userId}','${p.pseudo}')"` : '""'}">${initial}</div>
         <div class="post-meta">
-          <div class="post-pseudo">@${p.pseudo || 'anon'}</div>
+          <div class="post-pseudo ${!isOwner ? 'post-pseudo-clickable' : ''}" onclick="${!isOwner ? `"openUserPopup('${p.userId}','${p.pseudo}')"` : '""'}">@${p.pseudo || 'anon'}</div>
           <div class="post-time">${timeAgo(p.createdAt)}</div>
         </div>
         ${isOwner ? `<button class="delete-post-btn" onclick="deletePost('${p.id}')">🗑 Supprimer</button>` : ''}
@@ -3078,7 +3386,8 @@ window.switchSection = function(section, el) {
   if (fab) fab.style.display = section === 'msgs' ? 'flex' : 'none';
 
   if (section === 'msgs') {
-    loadConversations();
+    // Default to inbox tab
+    switchMsgsTab('inbox');
   }
 };
 
@@ -3580,6 +3889,196 @@ function watchUnreadCount() {
     }
   );
 }
+
+
+// ===== USER PROFILE POPUP =====
+let popupUserId = null;
+let popupUserPseudo = null;
+
+window.openUserPopup = function(userId, pseudo) {
+  if (!userId || userId === currentUser?.id) return;
+  popupUserId = userId;
+  popupUserPseudo = pseudo;
+  
+  const initial = (pseudo || '?')[0].toUpperCase();
+  document.getElementById('popupAvatar').textContent = initial;
+  document.getElementById('popupName').textContent = pseudo || 'Anonyme';
+  document.getElementById('popupPseudo').textContent = '@' + (pseudo || 'anon');
+  
+  document.getElementById('userPopupOverlay').classList.add('active');
+};
+
+window.closeUserPopup = function() {
+  document.getElementById('userPopupOverlay').classList.remove('active');
+  popupUserId = null;
+  popupUserPseudo = null;
+};
+
+window.popupStartConv = function() {
+  if (!popupUserId) return;
+  closeUserPopup();
+  startConversation(popupUserId);
+};
+
+// ===== MSGS TAB SWITCH =====
+window.switchMsgsTab = function(tab) {
+  document.getElementById('tabInbox').classList.toggle('active', tab === 'inbox');
+  document.getElementById('tabRoom').classList.toggle('active', tab === 'room');
+  
+  const inbox = document.getElementById('inboxTab');
+  const room = document.getElementById('roomTab');
+  
+  if (tab === 'inbox') {
+    inbox.style.display = 'flex';
+    room.style.display = 'none';
+    document.getElementById('newConvFab').style.display = 'flex';
+    loadConversations();
+  } else {
+    inbox.style.display = 'none';
+    room.style.display = 'flex';
+    document.getElementById('newConvFab').style.display = 'none';
+    loadRoomMessages();
+  }
+};
+
+// ===== ANON SALON =====
+let unsubRoom = null;
+const ROOM_ID = 'global_salon';
+
+// Generate a session-only anonymous name for the room
+function getRoomAnonName() {
+  // Stored in sessionStorage so it resets each session
+  let name = sessionStorage.getItem('xzone_room_name');
+  if (!name) {
+    const adjectives = ['Shadow', 'Ghost', 'Phantom', 'Void', 'Cipher', 'Spectre', 'Echo', 'Wraith', 'Veil', 'Noir', 'Dark', 'Silent', 'Zero', 'Null', 'Flux'];
+    const nouns = ['Wolf', 'Fox', 'Crow', 'Mask', 'Blade', 'Storm', 'Cipher', 'Node', 'Pulse', 'Wave', 'Fire', 'Ice', 'Dust', 'Wind', 'Byte'];
+    const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+    const noun = nouns[Math.floor(Math.random() * nouns.length)];
+    const num = Math.floor(Math.random() * 99);
+    name = `${adj}${noun}${num}`;
+    sessionStorage.setItem('xzone_room_name', name);
+  }
+  return name;
+}
+
+function loadRoomMessages() {
+  if (unsubRoom) unsubRoom();
+  
+  const container = document.getElementById('roomMessages');
+  container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  
+  // Update online presence
+  updateRoomPresence();
+  
+  const q = query(
+    collection(db, 'room_messages'),
+    orderBy('createdAt', 'desc'),
+    limit(80)
+  );
+  
+  unsubRoom = onSnapshot(q, snap => {
+    const msgs = snap.docs.map(d => ({ id: d.id, ...d.data() })).reverse();
+    renderRoomMessages(msgs);
+  });
+  
+  // Watch online count
+  watchRoomPresence();
+}
+
+async function updateRoomPresence() {
+  try {
+    await setDoc(doc(db, 'room_presence', currentUser.id), {
+      roomName: getRoomAnonName(),
+      lastSeen: serverTimestamp()
+    });
+  } catch(e) {}
+}
+
+function watchRoomPresence() {
+  // Count users active in last 2 minutes
+  onSnapshot(collection(db, 'room_presence'), snap => {
+    const twoMinsAgo = Date.now() - 2 * 60 * 1000;
+    const online = snap.docs.filter(d => {
+      const data = d.data();
+      const ts = data.lastSeen?.toDate?.()?.getTime() || 0;
+      return ts > twoMinsAgo;
+    }).length;
+    const el = document.getElementById('roomOnlineCount');
+    if (el) el.textContent = online + ' en ligne';
+  });
+}
+
+function renderRoomMessages(msgs) {
+  const container = document.getElementById('roomMessages');
+  const myRoomName = getRoomAnonName();
+  
+  if (!msgs.length) {
+    container.innerHTML = `
+      <div style="text-align:center;padding:50px 20px">
+        <div style="font-size:48px;margin-bottom:12px">🌐</div>
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);line-height:1.8">
+          Salon anonyme vide.<br>
+          Votre identité est <span style="color:var(--gold)">${myRoomName}</span><br>
+          <span style="font-size:9px;opacity:0.5">Réinitialisée à chaque session</span>
+        </div>
+      </div>`;
+    return;
+  }
+  
+  let html = '';
+  msgs.forEach(m => {
+    const isMine = m.senderId === currentUser.id;
+    const senderName = m.anonName || 'Anonyme';
+    const msgDate = m.createdAt?.toDate?.() || new Date();
+    const timeStr = msgDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    
+    html += `
+    <div class="room-msg ${isMine ? 'mine' : ''}">
+      <div class="room-avatar">${senderName.substring(0, 2)}</div>
+      <div>
+        <div class="room-sender">${isMine ? 'Vous (' + senderName + ')' : senderName}</div>
+        <div class="room-bubble">
+          ${m.text ? escapeHtml(m.text) : ''}
+          <div class="room-time">${timeStr}</div>
+        </div>
+      </div>
+    </div>`;
+  });
+  
+  container.innerHTML = html;
+  container.scrollTop = container.scrollHeight;
+}
+
+window.sendRoomMessage = async function() {
+  const input = document.getElementById('roomInput');
+  const text = input.value.trim();
+  if (!text) return;
+  
+  input.value = '';
+  input.style.height = 'auto';
+  
+  // Refresh presence
+  updateRoomPresence();
+  
+  try {
+    await addDoc(collection(db, 'room_messages'), {
+      text,
+      senderId: currentUser.id,
+      anonName: getRoomAnonName(),
+      createdAt: serverTimestamp()
+    });
+  } catch(e) {
+    console.error(e);
+    showToast('Erreur envoi', 'error');
+  }
+};
+
+window.handleRoomKey = function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendRoomMessage();
+  }
+};
 
 // ===== INIT =====
 autoLogin();
