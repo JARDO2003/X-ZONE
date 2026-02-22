@@ -1996,6 +1996,85 @@ body::before {
 }
 .post-pseudo-clickable:hover { color: var(--gold); }
 
+
+/* USER LIST IN INBOX */
+.user-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+  position: relative;
+}
+
+.user-list-item:hover { background: var(--bg3); }
+
+.user-list-item:active { background: var(--bg4); }
+
+.user-list-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-dark), var(--bg3));
+  border: 1px solid var(--border-bright);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--gold);
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.user-list-info { flex: 1; min-width: 0; }
+
+.user-list-pseudo {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-list-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-list-arrow {
+  color: var(--text-muted);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.user-list-unread {
+  width: 20px; height: 20px;
+  background: var(--gold);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--bg);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.user-section-label {
+  padding: 8px 16px 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: var(--bg);
+}
+
 </style>
 </head>
 <body>
@@ -2231,44 +2310,99 @@ body::before {
       <!-- ===== INBOX TAB ===== -->
       <div id="inboxTab" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
 
-        <!-- Conversations list -->
-        <div class="msgs-list-view" id="msgsListView" style="flex:1;overflow-y:auto">
-          <div class="anon-notice">
-            🔒 Les pseudos sont masqués en DM — chaque utilisateur s'affiche sous un <span>code anonyme</span>.
+        <!-- Users list (full width) -->
+        <div id="inboxUsersList" style="flex:1;overflow-y:auto">
+          <div style="padding:10px 16px 6px;display:flex;align-items:center;gap:10px">
+            <input type="text" class="search-input" id="inboxSearch"
+              placeholder="🔍  Rechercher un utilisateur..."
+              oninput="filterInboxUsers(this.value)"
+              style="flex:1;font-size:13px">
           </div>
-          <div class="conv-list" id="convList">
+          <div id="allUsersList">
             <div class="loading"><div class="spinner"></div>Chargement...</div>
           </div>
         </div>
 
-        <!-- Chat view (DM) -->
-        <div class="chat-view" id="chatView">
-          <div class="chat-header">
-            <button class="chat-back" onclick="closeChatView()">‹</button>
-            <div class="conv-avatar" id="chatAvatar" style="width:36px;height:36px;font-size:11px">?</div>
-            <div class="chat-user-info">
-              <div class="chat-user-name">
-                <span id="chatUserName">User</span>
-                <span class="online-dot" id="chatOnlineDot" style="display:none"></span>
-              </div>
-              <div class="chat-anon-label" id="chatAnonLabel">Identité masquée</div>
-            </div>
-          </div>
-          <div class="chat-messages" id="chatMessages">
-            <div class="loading"><div class="spinner"></div></div>
-          </div>
-          <div class="chat-input-area">
-            <button class="chat-attach-btn" onclick="document.getElementById('chatImgInput').click()">📎</button>
-            <input type="file" id="chatImgInput" accept="image/*" style="display:none" onchange="sendImageMsg(event)">
-            <textarea class="chat-input" id="chatInput" placeholder="Message privé..." rows="1"
-              onkeydown="handleChatKey(event)"
-              oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';notifyTyping()"></textarea>
-            <button class="chat-send-btn" onclick="sendMessage()">➤</button>
+      </div>
+
+      <!-- CHAT FULLSCREEN (fixed overlay, outside tabs) -->
+      <div id="chatFullscreen" style="
+        display:none;
+        position:fixed;
+        inset:0;
+        background:var(--bg);
+        z-index:500;
+        flex-direction:column;
+      ">
+        <!-- Chat top bar -->
+        <div style="
+          height:56px;
+          background:rgba(8,8,8,0.97);
+          backdrop-filter:blur(20px);
+          border-bottom:1px solid var(--border);
+          display:flex;
+          align-items:center;
+          padding:0 16px;
+          gap:12px;
+          flex-shrink:0;
+        ">
+          <button onclick="closeChatFullscreen()" style="
+            width:34px;height:34px;
+            background:var(--bg3);
+            border:1px solid var(--border);
+            border-radius:50%;
+            color:var(--text);
+            font-size:18px;
+            cursor:pointer;
+            display:flex;align-items:center;justify-content:center;
+            transition:all 0.2s;
+            flex-shrink:0;
+          " onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
+             onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text)'">✕</button>
+          <div style="
+            width:38px;height:38px;
+            border-radius:50%;
+            background:linear-gradient(135deg,var(--gold-dark),var(--bg3));
+            border:1px solid var(--border-bright);
+            display:flex;align-items:center;justify-content:center;
+            font-family:var(--font-mono);font-size:13px;color:var(--gold);
+            flex-shrink:0;
+          " id="chatFsAvatar">?</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="chatFsName">—</div>
+            <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted)" id="chatFsSub">—</div>
           </div>
         </div>
 
-        <!-- FAB new DM -->
-        <button class="new-conv-btn" id="newConvFab" onclick="openModal('newConvModal')" title="Nouveau message">✉</button>
+        <!-- Messages -->
+        <div id="chatFsMessages" style="
+          flex:1;
+          overflow-y:auto;
+          padding:12px;
+          display:flex;
+          flex-direction:column;
+          gap:8px;
+        ">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+
+        <!-- Input -->
+        <div style="
+          padding:10px 12px;
+          border-top:1px solid var(--border);
+          display:flex;
+          align-items:flex-end;
+          gap:8px;
+          background:var(--bg2);
+          flex-shrink:0;
+        ">
+          <button class="chat-attach-btn" onclick="document.getElementById('chatFsImgInput').click()">📎</button>
+          <input type="file" id="chatFsImgInput" accept="image/*" style="display:none" onchange="sendFsImageMsg(event)">
+          <textarea class="chat-input" id="chatFsInput" placeholder="Message..." rows="1"
+            onkeydown="handleFsChatKey(event)"
+            oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+          <button class="chat-send-btn" onclick="sendFsMessage()">➤</button>
+        </div>
       </div>
 
       <!-- ===== SALON ANONYME TAB ===== -->
@@ -3570,56 +3704,113 @@ function getConvId(uid1, uid2) {
   return [uid1, uid2].sort().join('_');
 }
 
+let allUsersCache = [];
+
 async function loadConversations() {
-  const list = document.getElementById('convList');
-  list.innerHTML = '<div class="loading"><div class="spinner"></div>Chargement...</div>';
-  
+  // Now loads ALL users, with conversations-first sort
+  const container = document.getElementById('allUsersList');
+  container.innerHTML = '<div class="loading"><div class="spinner"></div>Chargement...</div>';
+
   try {
-    const { query: q2, collection: col, where: wh, orderBy: ob, getDocs: gd } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
-    
-    const snap = await getDocs(query(
+    // Load all users
+    const usersSnap = await getDocs(collection(db, 'users'));
+    allUsersCache = usersSnap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(u => u.id !== currentUser.id);
+
+    // Load existing conversations to show unread counts
+    const convsSnap = await getDocs(query(
       collection(db, 'conversations'),
-      where('participants', 'array-contains', currentUser.id),
-      orderBy('lastAt', 'desc'),
-      limit(30)
+      where('participants', 'array-contains', currentUser.id)
     ));
-    
-    if (snap.empty) {
-      list.innerHTML = `<div class="empty-state"><div class="empty-icon">💬</div><div class="empty-title">Aucune conversation</div><div class="empty-sub">Appuyez sur ✉ pour démarrer</div></div>`;
-      return;
-    }
-    
-    const convs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    
-    list.innerHTML = convs.map(c => {
-      const peerId = c.participants.find(p => p !== currentUser.id);
-      const anonName = getAnonName(peerId);
-      const hasUnread = c.unread && c.unread[currentUser.id] > 0;
-      const preview = c.lastMsg ? (c.lastMsg.length > 40 ? c.lastMsg.substring(0, 40) + '…' : c.lastMsg) : 'Démarrer la conversation';
-      
-      return `
-      <div class="conv-item ${hasUnread ? 'unread' : ''}" onclick="openChat('${c.id}', '${peerId}')">
-        <div class="conv-avatar">${getAnonInitial(peerId)}</div>
-        <div class="conv-info">
-          <div class="conv-name">
-            ${anonName}
-            <span class="conv-anon-tag">ANON</span>
-          </div>
-          <div class="conv-preview">${escapeHtml(preview)}</div>
-        </div>
-        <div class="conv-time">${c.lastAt ? timeAgo(c.lastAt) : ''}</div>
-      </div>`;
-    }).join('');
-    
-    // Update badge
-    const totalUnread = convs.reduce((acc, c) => acc + ((c.unread && c.unread[currentUser.id]) || 0), 0);
+
+    const convsMap = {};
+    let totalUnread = 0;
+    convsSnap.docs.forEach(d => {
+      const data = d.data();
+      const peerId = data.participants.find(p => p !== currentUser.id);
+      if (peerId) {
+        convsMap[peerId] = { id: d.id, ...data };
+        const unread = (data.unread && data.unread[currentUser.id]) || 0;
+        totalUnread += unread;
+      }
+    });
+
     updateMsgBadge(totalUnread);
-    
+    renderUsersList(allUsersCache, convsMap);
+
   } catch(e) {
     console.error(e);
-    list.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Erreur de chargement</div></div>';
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Erreur chargement</div></div>';
   }
 }
+
+function renderUsersList(users, convsMap) {
+  const container = document.getElementById('allUsersList');
+  if (!users.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Aucun utilisateur</div></div>';
+    return;
+  }
+
+  // Sort: users with existing convs first (by lastAt), then alphabetically
+  const withConv = users.filter(u => convsMap[u.id]).sort((a, b) => {
+    const aT = convsMap[a.id]?.lastAt?.toMillis?.() || 0;
+    const bT = convsMap[b.id]?.lastAt?.toMillis?.() || 0;
+    return bT - aT;
+  });
+  const withoutConv = users.filter(u => !convsMap[u.id]).sort((a, b) =>
+    (a.pseudo || '').localeCompare(b.pseudo || '')
+  );
+
+  let html = '';
+
+  if (withConv.length) {
+    html += `<div class="user-section-label">Conversations récentes</div>`;
+    html += withConv.map(u => renderUserItem(u, convsMap[u.id])).join('');
+  }
+
+  if (withoutConv.length) {
+    html += `<div class="user-section-label">Tous les membres</div>`;
+    html += withoutConv.map(u => renderUserItem(u, null)).join('');
+  }
+
+  container.innerHTML = html;
+}
+
+function renderUserItem(u, conv) {
+  const initial = (u.pseudo || '?')[0].toUpperCase();
+  const unread = (conv?.unread && conv.unread[currentUser.id]) || 0;
+  const preview = conv?.lastMsg ? escapeHtml(conv.lastMsg.substring(0, 35) + (conv.lastMsg.length > 35 ? '…' : '')) : '<span style="color:var(--text-muted);font-style:italic">Démarrer une conversation</span>';
+  const convId = conv ? conv.id : getConvId(currentUser.id, u.id);
+
+  return `
+  <div class="user-list-item" onclick="openChatFullscreen('${convId}', '${u.id}', '${escapeHtml(u.pseudo || 'anon')}')">
+    <div class="user-list-avatar">${initial}</div>
+    <div class="user-list-info">
+      <div class="user-list-pseudo">@${escapeHtml(u.pseudo || 'anon')}</div>
+      <div class="user-list-name">${preview}</div>
+    </div>
+    ${unread > 0
+      ? `<div class="user-list-unread">${unread}</div>`
+      : `<div class="user-list-arrow">›</div>`
+    }
+  </div>`;
+}
+
+window.filterInboxUsers = function(q) {
+  const search = q.toLowerCase().trim();
+  if (!search) {
+    renderUsersList(allUsersCache, {});
+    loadConversations(); // loads all users
+    return;
+  }
+  const filtered = allUsersCache.filter(u =>
+    (u.pseudo || '').toLowerCase().includes(search) ||
+    (u.prenom || '').toLowerCase().includes(search) ||
+    (u.nom || '').toLowerCase().includes(search)
+  );
+  renderUsersList(filtered, {});
+};
 
 function updateMsgBadge(count) {
   const badge = document.getElementById('msgNavBadge');
@@ -3633,32 +3824,175 @@ function updateMsgBadge(count) {
 }
 
 async function openChat(convId, peerId) {
+  // Redirect to fullscreen version
+  const snap = await getDocs(collection(db, 'users'));
+  const userDoc = snap.docs.find(d => d.id === peerId);
+  const pseudo = userDoc ? userDoc.data().pseudo : 'anon';
+  openChatFullscreen(convId, peerId, pseudo);
+}
+
+window.openChatFullscreen = async function(convId, peerId, pseudo) {
   currentConvId = convId;
   currentPeerId = peerId;
-  
-  const anonName = getAnonName(peerId);
-  document.getElementById('chatUserName').textContent = anonName;
-  document.getElementById('chatAnonLabel').textContent = `Identité masquée • ${peerId.substring(0,8).toUpperCase()}`;
-  document.getElementById('chatAvatar').textContent = 'U';
-  
-  // Switch views
-  document.getElementById('msgsListView').style.display = 'none';
-  document.getElementById('chatView').classList.add('active');
-  document.getElementById('newConvFab').style.display = 'none';
-  
-  // Mark as read
+
+  // Fill header
+  const initial = (pseudo || '?')[0].toUpperCase();
+  document.getElementById('chatFsAvatar').textContent = initial;
+  document.getElementById('chatFsName').textContent = '@' + (pseudo || 'anon');
+  document.getElementById('chatFsSub').textContent = 'Message privé · chiffré';
+
+  // Show fullscreen
+  const fs = document.getElementById('chatFullscreen');
+  fs.style.display = 'flex';
+  // Animate in
+  fs.style.transform = 'translateX(100%)';
+  fs.style.transition = 'transform 0.3s ease';
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      fs.style.transform = 'translateX(0)';
+    });
+  });
+
+  // Ensure conv exists
   try {
+    await setDoc(doc(db, 'conversations', convId), {
+      participants: [currentUser.id, peerId],
+      lastMsg: '',
+      lastAt: serverTimestamp(),
+    }, { merge: true });
+    // Mark as read
     const upd = {};
     upd[`unread.${currentUser.id}`] = 0;
     await updateDoc(doc(db, 'conversations', convId), upd);
   } catch(e) {}
-  
+
   // Load messages realtime
-  loadMessages(convId);
-  
-  // Focus input
-  setTimeout(() => document.getElementById('chatInput').focus(), 300);
+  loadMessageFs(convId);
+
+  setTimeout(() => document.getElementById('chatFsInput').focus(), 400);
+};
+
+function loadMessageFs(convId) {
+  if (unsubMessages) unsubMessages();
+
+  const container = document.getElementById('chatFsMessages');
+  container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+  const q = query(
+    collection(db, 'conversations', convId, 'messages'),
+    orderBy('createdAt', 'asc'),
+    limit(100)
+  );
+
+  unsubMessages = onSnapshot(q, snap => {
+    const messages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderFsMessages(messages);
+  });
 }
+
+function renderFsMessages(messages) {
+  const container = document.getElementById('chatFsMessages');
+
+  if (!messages.length) {
+    container.innerHTML = `
+      <div style="text-align:center;padding:60px 20px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">
+        <div style="font-size:48px;margin-bottom:16px">🔒</div>
+        <div style="font-family:var(--font-mono);font-size:12px;color:var(--text-muted);line-height:1.8">
+          Conversation chiffrée<br>
+          <span style="color:var(--gold)">Soyez le premier à écrire</span>
+        </div>
+      </div>`;
+    return;
+  }
+
+  let lastDate = null;
+  let html = '';
+
+  messages.forEach(m => {
+    const isMine = m.senderId === currentUser.id;
+    const msgDate = m.createdAt?.toDate?.() || new Date();
+    const dateStr = msgDate.toLocaleDateString('fr-FR', { weekday:'short', day:'numeric', month:'short' });
+    const timeStr = msgDate.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+
+    if (dateStr !== lastDate) {
+      html += `<div class="msg-date-sep">${dateStr}</div>`;
+      lastDate = dateStr;
+    }
+
+    html += `
+    <div class="msg-bubble-wrap ${isMine ? 'mine' : ''}">
+      ${!isMine ? '<div class="msg-avatar-sm">U</div>' : ''}
+      <div class="msg-bubble">
+        ${m.imageUrl ? `<img class="msg-image" src="${m.imageUrl}" onclick="openImageViewer('${m.imageUrl}')">` : ''}
+        ${m.text ? escapeHtml(m.text) : ''}
+        <div class="msg-time">${timeStr}</div>
+      </div>
+      ${isMine ? '<div class="msg-avatar-sm">U</div>' : ''}
+    </div>`;
+  });
+
+  container.innerHTML = html;
+  container.scrollTop = container.scrollHeight;
+}
+
+window.sendFsMessage = async function() {
+  const input = document.getElementById('chatFsInput');
+  const text = input.value.trim();
+  if (!text || !currentConvId) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+
+  try {
+    await addDoc(collection(db, 'conversations', currentConvId, 'messages'), {
+      text,
+      senderId: currentUser.id,
+      createdAt: serverTimestamp()
+    });
+    const upd = { lastMsg: text, lastAt: serverTimestamp(), participants: [currentUser.id, currentPeerId] };
+    upd[`unread.${currentPeerId}`] = increment(1);
+    upd[`unread.${currentUser.id}`] = 0;
+    await setDoc(doc(db, 'conversations', currentConvId), upd, { merge: true });
+  } catch(e) {
+    console.error(e);
+    showToast('Erreur envoi', 'error');
+  }
+};
+
+window.sendFsImageMsg = async function(e) {
+  const file = e.target.files[0];
+  if (!file || !currentConvId) return;
+  showToast('Upload...', 'info');
+  try {
+    const url = await uploadToCloudinary(file);
+    await addDoc(collection(db, 'conversations', currentConvId, 'messages'), {
+      imageUrl: url, senderId: currentUser.id, createdAt: serverTimestamp()
+    });
+    const upd = { lastMsg: '📸 Image', lastAt: serverTimestamp() };
+    upd[`unread.${currentPeerId}`] = increment(1);
+    await setDoc(doc(db, 'conversations', currentConvId), upd, { merge: true });
+    e.target.value = '';
+    showToast('Image envoyée!', 'success');
+  } catch(err) { showToast('Erreur upload', 'error'); }
+};
+
+window.handleFsChatKey = function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendFsMessage(); }
+};
+
+window.closeChatFullscreen = function() {
+  const fs = document.getElementById('chatFullscreen');
+  fs.style.transform = 'translateX(100%)';
+  setTimeout(() => {
+    fs.style.display = 'none';
+    fs.style.transform = '';
+    fs.style.transition = '';
+  }, 300);
+  if (unsubMessages) { unsubMessages(); unsubMessages = null; }
+  currentConvId = null;
+  currentPeerId = null;
+  loadConversations();
+};
 
 function loadMessages(convId) {
   if (unsubMessages) unsubMessages();
@@ -3800,13 +4134,7 @@ window.notifyTyping = function() {
 };
 
 window.closeChatView = function() {
-  if (unsubMessages) { unsubMessages(); unsubMessages = null; }
-  currentConvId = null;
-  currentPeerId = null;
-  document.getElementById('chatView').classList.remove('active');
-  document.getElementById('msgsListView').style.display = '';
-  document.getElementById('newConvFab').style.display = 'flex';
-  loadConversations();
+  closeChatFullscreen();
 };
 
 // ===== USER SEARCH =====
@@ -3845,34 +4173,18 @@ window.searchUsers = async function(query) {
   }
 };
 
-window.startConversation = async function(peerId) {
+window.startConversation = async function(peerId, pseudo) {
   closeModal('newConvModal');
-  document.getElementById('userSearchInput').value = '';
-  document.getElementById('userSearchResults').innerHTML = '';
-  
+  if (document.getElementById('userSearchInput')) document.getElementById('userSearchInput').value = '';
+  if (document.getElementById('userSearchResults')) document.getElementById('userSearchResults').innerHTML = '';
+
   const convId = getConvId(currentUser.id, peerId);
-  
-  // Ensure conversation doc exists
-  try {
-    await setDoc(doc(db, 'conversations', convId), {
-      participants: [currentUser.id, peerId],
-      lastMsg: '',
-      lastAt: serverTimestamp(),
-    }, { merge: true });
-  } catch(e) { console.error(e); }
-  
-  // Switch to msgs section
-  const navBtns = document.querySelectorAll('.nav-item');
-  navBtns.forEach(b => b.classList.remove('active'));
-  // Find msgs nav btn
-  const msgsBtn = Array.from(navBtns).find(b => b.textContent.includes('Messages'));
-  if (msgsBtn) msgsBtn.classList.add('active');
-  
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById('section-msgs').classList.add('active');
-  document.getElementById('topbarSection').textContent = 'Messages';
-  
-  await openChat(convId, peerId);
+  const resolvedPseudo = pseudo || (() => {
+    const u = allUsersCache.find(u => u.id === peerId);
+    return u ? u.pseudo : 'anon';
+  })();
+
+  openChatFullscreen(convId, peerId, resolvedPseudo);
 };
 
 // Watch for new messages globally to update badge
